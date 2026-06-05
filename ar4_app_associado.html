@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AR4 Proteção Veicular</title>
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AR4">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "91523804-af13-4d65-a26c-46f336a8b2e1",
+      safari_web_id: "web.onesignal.auto.0d033746-9b8a-4e2f-a0e7-88cee0acb9dd",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
+<style>
+:root{--p:#0A0A0A;--p2:#111;--p3:#1A1A1A;--p4:#242424;--am:#FFD600;--br:#FFF;--ci:#888;--bo:#2A2A2A;--ve:#4CAF50;--vm:#FF3B3B;--r:14px;--rs:9px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Barlow',sans-serif;background:var(--p);color:var(--br);max-width:430px;margin:0 auto;min-height:100vh;}
+.nav{position:sticky;top:0;z-index:100;background:var(--p2);border-bottom:1px solid var(--bo);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+.logo span{color:var(--am);}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ci);}
+.dot.on{background:var(--ve);}
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--p2);border-top:1px solid var(--bo);display:flex;z-index:100;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 16px;cursor:pointer;border:none;background:none;color:var(--ci);font-family:'Barlow',sans-serif;font-size:10px;}
+.tab svg{width:22px;height:22px;}
+.tab.active{color:var(--am);}
+.screen{display:none;padding:16px 14px 100px;}
+.screen.active{display:block;animation:up .18s ease;}
+@keyframes up{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.card{background:var(--p3);border:1px solid var(--bo);border-radius:var(--r);padding:16px;margin-bottom:10px;}
+.card-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--am);margin-bottom:12px;}
+label{font-size:12px;color:var(--ci);display:block;margin:10px 0 4px;}
+label:first-of-type{margin-top:0;}
+input,select{width:100%;padding:11px 13px;background:var(--p4);border:1px solid var(--bo);border-radius:var(--rs);color:var(--br);font-family:'Barlow',sans-serif;font-size:14px;outline:none;-webkit-appearance:none;}
+input:focus,select:focus{border-color:var(--am);}
+select option{background:var(--p);}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--rs);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.btn svg{width:18px;height:18px;}
+.btn-am{background:var(--am);color:var(--p);}
+.btn-am:active{transform:scale(.97);}
+.btn-out{background:transparent;color:var(--br);border:1px solid var(--bo);}
+.btn-ve{background:var(--ve);color:#fff;}
+.btn-notif{background:var(--p4);color:var(--ve);border:1px solid var(--ve);margin-bottom:12px;}
+
+/* CARTÃO */
+.cartao{border-radius:16px;padding:20px;background:var(--p3);border:1px solid var(--bo);position:relative;overflow:hidden;margin-bottom:10px;}
+.cartao-faixa{position:absolute;top:0;left:0;right:0;height:4px;}
+.cartao-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;margin-top:6px;}
+.cartao-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;}
+.cartao-logo span{color:var(--am);}
+.cartao-nivel{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;}
+.cartao-nome{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;}
+.cartao-info{font-size:11px;color:var(--ci);margin-top:2px;}
+.cartao-rodape{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px;}
+.cartao-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#444;letter-spacing:2px;}
+.cartao-status{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--am);}
+
+/* SCORE */
+.score-box{background:var(--p3);border:1px solid var(--bo);border-radius:var(--r);padding:16px;margin-bottom:10px;}
+.score-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.score-nivel{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+.score-badge{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.score-bar-wrap{height:8px;background:var(--p4);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.score-bar{height:8px;border-radius:99px;transition:width .6s ease;}
+.score-info{display:flex;justify-content:space-between;font-size:11px;color:var(--ci);}
+.score-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.score-stat{background:var(--p4);border-radius:var(--rs);padding:12px;text-align:center;}
+.score-stat-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--am);}
+.score-stat-lbl{font-size:11px;color:var(--ci);margin-top:2px;}
+.beneficio{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bo);}
+.beneficio:last-child{border-bottom:none;padding-bottom:0;}
+.beneficio-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.beneficio-txt{font-size:13px;color:var(--br);}
+.beneficio-sub{font-size:11px;color:var(--ci);}
+
+/* INDICAÇÃO */
+.ind-card{background:var(--p3);border:1px solid var(--bo);border-radius:var(--r);padding:16px;margin-bottom:10px;}
+.cartao-ind{border-radius:14px;padding:18px;position:relative;overflow:hidden;margin-bottom:12px;}
+.cartao-ind-faixa{position:absolute;top:0;left:0;right:0;height:3px;}
+.cartao-ind-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;margin-bottom:12px;}
+.cartao-ind-logo span{color:var(--am);}
+.cartao-ind-msg{font-size:12px;color:#aaa;line-height:1.5;margin-bottom:12px;}
+.cartao-ind-nome{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;}
+.cartao-ind-sub{font-size:11px;color:var(--ci);margin-top:2px;}
+.ind-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bo);}
+.ind-item:last-child{border-bottom:none;}
+.ind-av{width:36px;height:36px;border-radius:50%;background:var(--am);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--p);flex-shrink:0;}
+.ind-nome{font-size:13px;font-weight:600;}
+.ind-info{font-size:11px;color:var(--ci);margin-top:1px;}
+.ind-badge{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.ind-confirmado{background:rgba(76,175,80,.15);color:var(--ve);}
+.ind-pendente{background:rgba(255,214,0,.15);color:var(--am);}
+
+/* ALERTAS */
+.sec-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--ci);margin-bottom:10px;}
+.alerta-card{background:var(--p3);border:1px solid var(--bo);border-radius:var(--r);padding:16px;margin-bottom:10px;animation:up .2s ease;}
+.alerta-novo{border-color:var(--am);}
+.alerta-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.badge-novo{background:var(--am);color:var(--p);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;}
+.badge-visto{background:var(--p4);color:var(--ci);font-family:'Barlow Condensed',sans-serif;font-size:11px;padding:2px 10px;border-radius:20px;}
+.alerta-data{font-size:11px;color:var(--ci);}
+.alerta-tit{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;margin-bottom:10px;}
+.row{display:flex;gap:10px;align-items:center;margin-bottom:6px;}
+.row-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--am);min-width:75px;text-transform:uppercase;}
+.row-val{font-size:13px;color:var(--br);}
+.alerta-footer{border-top:1px solid var(--bo);padding-top:10px;margin-top:10px;font-size:12px;color:#888;line-height:1.6;}
+
+.install-tip{background:rgba(255,214,0,.07);border:1px solid rgba(255,214,0,.2);border-radius:var(--rs);padding:12px;margin-bottom:12px;font-size:12px;color:var(--ci);line-height:1.6;}
+.install-tip strong{color:var(--am);}
+.empty{text-align:center;padding:30px 20px;color:var(--ci);}
+.empty p{font-size:13px;line-height:1.6;}
+.div{border:none;border-top:1px solid var(--bo);margin:14px 0;}
+.sec-tit{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:4px;}
+.sec-sub{font-size:13px;color:var(--ci);margin-bottom:16px;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:4px;margin-bottom:2px;}
+.login-logo span{color:var(--am);}
+.login-sub{font-size:13px;color:var(--ci);margin-bottom:30px;}
+.login-card{background:var(--p3);border:1px solid var(--bo);border-radius:var(--r);padding:20px;width:100%;}
+.login-tit{font-family:'Bebas Neue',sans-serif;font-size:20px;margin-bottom:4px;}
+.login-desc{font-size:13px;color:var(--ci);margin-bottom:14px;line-height:1.5;}
+
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--am);color:var(--p);padding:9px 20px;border-radius:30px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* NÍVEIS */
+.nivel-basico{color:#CD7F32;}
+.nivel-master{color:#C0C0C0;}
+.nivel-ouro{color:#FFD600;}
+.nivel-diamante{color:#B9F2FF;}
+.bg-basico{background:#CD7F32;}
+.bg-master{background:#C0C0C0;}
+.bg-ouro{background:#FFD600;}
+.bg-diamante{background:#B9F2FF;}
+.txt-basico{background:rgba(205,127,50,.15);color:#CD7F32;}
+.txt-master{background:rgba(192,192,192,.15);color:#C0C0C0;}
+.txt-ouro{background:rgba(255,214,0,.15);color:#FFD600;}
+.txt-diamante{background:rgba(185,242,255,.15);color:#B9F2FF;}
+
+/* SOS */
+.sos-overlay{position:fixed;inset:0;background:#0D0D0D;z-index:999;display:none;flex-direction:column;overflow-y:auto;padding:24px 16px 40px;}
+.sos-overlay.active{display:flex;}
+.sos-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #2A2A2A;}
+.sos-dot{width:12px;height:12px;border-radius:50%;background:var(--vm);flex-shrink:0;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.sos-header-txt{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--vm);text-transform:uppercase;}
+.sos-header-sub{font-size:12px;color:var(--ci);margin-top:1px;}
+.sos-veiculo{background:#1A0A0A;border:1px solid rgba(255,59,59,.3);border-radius:var(--r);padding:16px;margin-bottom:20px;}
+.sos-veiculo-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,59,59,.7);text-transform:uppercase;margin-bottom:8px;}
+.sos-veiculo-nome{font-size:16px;font-weight:600;color:var(--br);}
+.sos-veiculo-info{font-size:13px;color:var(--ci);margin-top:4px;line-height:1.5;}
+.sos-sec{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--ci);text-transform:uppercase;margin-bottom:10px;margin-top:20px;}
+.sos-btn{width:100%;padding:16px;border:none;border-radius:var(--rs);font-family:'Barlow',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:10px;text-align:left;}
+.sos-btn svg{width:20px;height:20px;flex-shrink:0;}
+.sos-btn-lbl{flex:1;}
+.sos-btn-num{font-size:12px;opacity:.7;font-weight:400;margin-top:1px;}
+.sos-btn-central{background:#FF3B3B;color:#fff;}
+.sos-btn-whats{background:#1FAF38;color:#fff;}
+.sos-btn-consultor{background:var(--p3);color:var(--br);border:1px solid var(--bo);}
+.sos-ocorrido{background:var(--p3);border:1px solid var(--bo);border-radius:var(--r);padding:16px;margin-top:20px;}
+.sos-ocorrido-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--am);text-transform:uppercase;margin-bottom:10px;}
+.sos-ocorrido textarea{width:100%;padding:10px 12px;background:var(--p4);border:1px solid var(--bo);border-radius:var(--rs);color:var(--br);font-family:'Barlow',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.5;}
+.sos-ocorrido textarea:focus{border-color:var(--am);}
+.sos-enviar{width:100%;padding:14px;border:none;border-radius:var(--rs);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.8px;cursor:pointer;background:var(--am);color:var(--p);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.sos-enviar svg{width:16px;height:16px;}
+.sos-fechar{width:100%;padding:12px;border:none;border-radius:var(--rs);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;background:transparent;color:var(--ci);border:1px solid var(--bo);margin-top:10px;}
+
+/* Botão SOS fixo */
+.sos-fab{position:fixed;bottom:90px;right:14px;z-index:98;display:none;cursor:pointer;background:none;border:none;padding:0;}
+.sos-fab.show{display:block;}
+.sos-fab-inner{width:52px;height:52px;border-radius:50%;background:var(--vm);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(255,59,59,.4);}
+.sos-fab-inner svg{width:22px;height:22px;color:#fff;}
+.sos-fab-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--vm);text-align:center;margin-top:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="tela-login">
+  <div class="login-wrap">
+    <div class="login-logo">AR4<span>.</span></div>
+    <div class="login-sub">Proteção Veicular</div>
+    <div class="login-card">
+      <div class="login-tit">Bem-vindo!</div>
+      <div class="login-desc">Preencha seus dados uma única vez para começar a receber alertas.</div>
+      <label>Seu nome *</label><input type="text" id="u-nome" placeholder="Ex: João da Silva">
+      <label>CPF *</label><input type="text" id="u-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
+      <label>Código do seu consultor *</label><input type="text" id="u-codigo" placeholder="Ex: TACIANO01" style="text-transform:uppercase;">
+      <label>Tipo de veículo *</label>
+      <select id="u-tipo"><option value="">Selecione...</option><option>Moto</option><option>Carro</option><option>Caminhonete / SUV</option></select>
+      <label>Modelo *</label><input type="text" id="u-modelo" placeholder="Ex: Honda CG 160">
+      <label>Placa do veículo *</label><input type="text" id="u-placa" placeholder="Ex: ABC-1234" style="text-transform:uppercase;" maxlength="8">
+      <label>Bairro</label><input type="text" id="u-bairro" placeholder="Ex: Afogados, Recife">
+      <label>WhatsApp</label><input type="tel" id="u-tel" placeholder="81 9 0000-0000">
+      <label>Vencimento do boleto</label>
+      <select id="u-venc"><option value="">Selecione...</option><option>Dia 5</option><option>Dia 10</option><option>Dia 15</option><option>Dia 20</option><option>Dia 25</option><option>Dia 30</option></select>
+      <!-- link de indicação pré-preenchido via URL -->
+      <input type="hidden" id="u-indicador">
+      <button class="btn btn-am" onclick="cadastrar()" style="margin-top:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        ENTRAR E ATIVAR ALERTAS
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="tela-app" style="display:none;">
+  <div class="nav">
+    <div class="logo">AR4<span>.</span></div>
+    <div class="dot" id="dot"></div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="cartao" id="cartao-principal">
+      <div class="cartao-faixa" id="cartao-faixa"></div>
+      <div class="cartao-top">
+        <div class="cartao-logo">AR4<span> PROTEÇÃO</span></div>
+        <div class="cartao-nivel" id="cartao-nivel-badge">—</div>
+      </div>
+      <div><div class="cartao-nome" id="c-nome">—</div><div class="cartao-info" id="c-veiculo">—</div></div>
+      <div class="cartao-rodape">
+        <div class="cartao-num" id="c-consultor">CONSULTOR: —</div>
+        <div class="cartao-status">✓ ASSOCIADO ATIVO</div>
+      </div>
+    </div>
+
+    <button class="btn btn-notif" id="btn-notif" onclick="ativarNotif()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      ATIVAR NOTIFICAÇÕES
+    </button>
+
+    <div class="install-tip" id="install-tip" style="display:none;">
+      📲 <strong>Adicione à tela inicial!</strong> Toque em Compartilhar → "Adicionar à tela de início".
+    </div>
+
+    <div class="sec-label">Alertas da AR4</div>
+    <div id="lista-alertas"></div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="screen" id="screen-score">
+    <div class="sec-tit">Meu Score</div>
+    <p class="sec-sub">Indique amigos e suba de nível!</p>
+
+    <div class="score-box">
+      <div class="score-header">
+        <div>
+          <div style="font-size:12px;color:var(--ci);margin-bottom:2px;">Nível atual</div>
+          <div class="score-nivel" id="score-nivel-nome">—</div>
+        </div>
+        <div class="score-badge" id="score-badge">—</div>
+      </div>
+      <div class="score-bar-wrap"><div class="score-bar" id="score-bar" style="width:0%;background:var(--am);"></div></div>
+      <div class="score-info">
+        <span id="score-atual-txt">0 indicações confirmadas</span>
+        <span id="score-prox-txt"></span>
+      </div>
+      <div class="score-stats">
+        <div class="score-stat"><div class="score-stat-num" id="sc-total">0</div><div class="score-stat-lbl">indicações totais</div></div>
+        <div class="score-stat"><div class="score-stat-num" id="sc-conf">0</div><div class="score-stat-lbl">confirmadas</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Benefícios do seu nível</div>
+      <div id="lista-beneficios"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Próximos níveis</div>
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--p4);border-radius:var(--rs);">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#CD7F32;">BÁSICO</span>
+          <span style="font-size:12px;color:var(--ci);">2 indicações</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--p4);border-radius:var(--rs);">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#C0C0C0;">MASTER</span>
+          <span style="font-size:12px;color:var(--ci);">3 indicações</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--p4);border-radius:var(--rs);">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#FFD600;">OURO</span>
+          <span style="font-size:12px;color:var(--ci);">5 indicações</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--p4);border-radius:var(--rs);">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#B9F2FF;">DIAMANTE</span>
+          <span style="font-size:12px;color:var(--ci);">8 indicações</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INDICAÇÃO -->
+  <div class="screen" id="screen-indicacao">
+    <div class="sec-tit">Indicar amigo</div>
+    <p class="sec-sub">Compartilhe seu cartão e ganhe benefícios a cada indicação confirmada.</p>
+
+    <!-- cartão de indicação -->
+    <div class="cartao-ind" id="cartao-ind" style="background:var(--p3);border:1px solid var(--bo);">
+      <div class="cartao-ind-faixa" id="cartao-ind-faixa" style="background:var(--am);"></div>
+      <div class="cartao-ind-logo">AR4<span>.</span> PROTEÇÃO VEICULAR</div>
+      <div class="cartao-ind-msg">Fui indicado por:</div>
+      <div class="cartao-ind-nome" id="ind-nome-cartao">—</div>
+      <div class="cartao-ind-sub" id="ind-nivel-cartao">Associado AR4</div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:var(--ci);">
+        Acesse o app e use meu código de indicação para se associar com vantagens exclusivas!
+      </div>
+    </div>
+
+    <button class="btn btn-am" onclick="compartilharCartao()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      COMPARTILHAR CARTÃO DE INDICAÇÃO
+    </button>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-label">Cashback acumulado</div>
+      <div style="text-align:center;padding:10px 0;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--am);" id="cashback-meses">0</div>
+        <div style="font-size:13px;color:var(--ci);">meses de desconto na mensalidade</div>
+        <div style="font-size:11px;color:var(--ci);margin-top:4px;">1 mês grátis por cada indicação confirmada</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Minhas indicações</div>
+      <div id="lista-indicacoes"><div class="empty"><p>Nenhuma indicação ainda.<br>Compartilhe seu cartão!</p></div></div>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="screen" id="screen-perfil">
+    <div class="sec-tit">Meu perfil</div>
+    <p class="sec-sub">Seus dados na AR4.</p>
+    <div class="card">
+      <div class="card-label">Informações</div>
+      <div id="perfil-info"></div>
+    </div>
+    <div class="div"></div>
+    <button class="btn btn-out" style="margin-top:0;" onclick="sair()">Sair / Trocar conta</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="goTab('home')" id="tab-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Início
+    </button>
+    <button class="tab" onclick="goTab('score')" id="tab-score">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Score
+    </button>
+    <button class="tab" onclick="goTab('indicacao')" id="tab-indicacao">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Indicar
+    </button>
+    <button class="tab" onclick="goTab('perfil')" id="tab-perfil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </button>
+  </div>
+</div>
+
+<!-- BOTÃO SOS FIXO -->
+<button class="sos-fab" id="sos-fab" onclick="abrirSOS()" aria-label="SOS Emergência">
+  <div class="sos-fab-inner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </div>
+  <div class="sos-fab-label">SOS</div>
+</button>
+
+<!-- TELA SOS -->
+<div class="sos-overlay" id="sos-overlay">
+  <div style="width:100%;max-width:400px;margin:0 auto;">
+
+    <div class="sos-header">
+      <div class="sos-dot"></div>
+      <div>
+        <div class="sos-header-txt">Central de Emergência AR4</div>
+        <div class="sos-header-sub">Mantenha a calma — estamos aqui para ajudar</div>
+      </div>
+    </div>
+
+    <div class="sos-veiculo">
+      <div class="sos-veiculo-label">Seus dados do veículo</div>
+      <div class="sos-veiculo-nome" id="sos-veiculo-nome">—</div>
+      <div class="sos-veiculo-info" id="sos-veiculo-info">Informe esses dados à central e à polícia</div>
+      <div style="margin-top:8px;font-size:11px;color:var(--ci);" id="sos-consultor-info">—</div>
+    </div>
+
+    <div class="sos-sec">Contatos de emergência</div>
+
+    <button class="sos-btn sos-btn-central" onclick="ligarCentral()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <div class="sos-btn-lbl">
+        <div>Central AR4 — Ligação gratuita</div>
+        <div class="sos-btn-num">0800 940 1880 · Disponível 24h</div>
+      </div>
+    </button>
+
+    <button class="sos-btn sos-btn-whats" onclick="whatsEmergencia()">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <div class="sos-btn-lbl">
+        <div>WhatsApp da Central</div>
+        <div class="sos-btn-num">(85) 4141-1120 · Atendimento imediato</div>
+      </div>
+    </button>
+
+    <button class="sos-btn sos-btn-consultor" onclick="ligarConsultor()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <div class="sos-btn-lbl">
+        <div>Ligar para meu consultor</div>
+        <div class="sos-btn-num" id="sos-consultor-nome">—</div>
+      </div>
+    </button>
+
+    <div class="sos-ocorrido">
+      <div class="sos-ocorrido-label">Registrar o ocorrido</div>
+      <p style="font-size:12px;color:var(--ci);margin-bottom:10px;line-height:1.6;">Descreva brevemente o que aconteceu. Seu consultor receberá uma notificação imediata com esse registro.</p>
+      <textarea id="sos-descricao" rows="3" placeholder="Ex: Minha moto foi roubada por dois indivíduos na Rua X, bairro Y, por volta das 22h..."></textarea>
+      <button class="sos-enviar" onclick="enviarOcorrido()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        ALERTAR MEU CONSULTOR AGORA
+      </button>
+    </div>
+
+    <button class="sos-fechar" onclick="fecharSOS()">Fechar emergência</button>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const fb = initializeApp({
+  apiKey:"AIzaSyCiKR_Nhl6tfDYgR-Y-XTR7WzJh8sHJpdA",
+  authDomain:"ar4-consultor.firebaseapp.com",
+  projectId:"ar4-consultor",
+  storageBucket:"ar4-consultor.firebasestorage.app",
+  messagingSenderId:"804873108130",
+  appId:"1:804873108130:web:a0a63bfae687b43b1975fb"
+});
+const db = getFirestore(fb);
+
+// NÍVEIS
+const NIVEIS = [
+  {nome:'INICIANTE', min:0, max:1, cor:'#888', cls:'master', beneficios:['Acesso ao app AR4','Alertas de recuperação em tempo real','Cartão digital de associado']},
+  {nome:'BÁSICO', min:2, max:2, cor:'#CD7F32', cls:'basico', beneficios:['Todos os benefícios anteriores','1 mês de desconto na mensalidade','Destaque no cartão digital']},
+  {nome:'MASTER', min:3, max:4, cor:'#C0C0C0', cls:'master', beneficios:['Todos os benefícios anteriores','3 meses de desconto acumulados','Prioridade no atendimento']},
+  {nome:'OURO', min:5, max:7, cor:'#FFD600', cls:'ouro', beneficios:['Todos os benefícios anteriores','5 meses de desconto acumulados','Badge Ouro no cartão','Atendimento VIP']},
+  {nome:'DIAMANTE', min:8, max:999, cor:'#B9F2FF', cls:'diamante', beneficios:['Todos os benefícios anteriores','8 meses de desconto acumulados','Badge Diamante exclusivo','Consultor dedicado','Indicado como embaixador AR4']},
+];
+
+function getNivel(ind){ return NIVEIS.find(n=>ind>=n.min&&ind<=n.max)||NIVEIS[0]; }
+
+let usuario = JSON.parse(localStorage.getItem('ar4assoc')||'null');
+let ultimoId = localStorage.getItem('ar4ultimo')||'';
+let notifAtiva = localStorage.getItem('ar4notif')==='true';
+let docId = localStorage.getItem('ar4docid')||'';
+let indConfirmadas = 0;
+let indTotal = 0;
+
+// Pegar código de indicação da URL
+const urlParams = new URLSearchParams(window.location.search);
+const indParam = urlParams.get('ind');
+if(indParam) document.getElementById('u-indicador').value = indParam;
+
+function init(){ if(usuario) iniciarApp(); }
+
+window.mascaraCPF=(el)=>{
+  let v=el.value.replace(/\D/g,'');
+  v=v.replace(/(\d{3})(\d)/,'$1.$2');
+  v=v.replace(/(\d{3})(\d)/,'$1.$2');
+  v=v.replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value=v;
+}
+
+window.cadastrar=async()=>{
+  const nome=document.getElementById('u-nome').value.trim();
+  const cpf=document.getElementById('u-cpf').value.trim();
+  const codigo=document.getElementById('u-codigo').value.trim().toUpperCase();
+  const tipo=document.getElementById('u-tipo').value;
+  const modelo=document.getElementById('u-modelo').value.trim();
+  const placa=document.getElementById('u-placa').value.trim().toUpperCase();
+  const bairro=document.getElementById('u-bairro').value.trim();
+  const tel=document.getElementById('u-tel').value.trim();
+  const venc=document.getElementById('u-venc').value;
+  const indicador=document.getElementById('u-indicador').value.trim();
+  if(!nome||!cpf||!codigo||!tipo||!modelo||!placa){showToast('Preencha os campos obrigatórios!');return;}
+  showToast('Verificando dados...');
+  try {
+    // verificar se consultor existe
+    const qCons=query(collection(db,'consultores'),where('codigo','==',codigo));
+    const snapCons=await getDocs(qCons);
+    if(snapCons.empty){showToast('Código de consultor não encontrado!');return;}
+    const cons=snapCons.docs[0].data();
+
+    // verificar se CPF já está cadastrado
+    const qCPF=query(collection(db,'associados'),where('cpf','==',cpf));
+    const snapCPF=await getDocs(qCPF);
+
+    let ref, docIdLocal;
+
+    if(!snapCPF.empty){
+      // associado já existe — apenas recuperar dados
+      const docExistente=snapCPF.docs[0];
+      docIdLocal=docExistente.id;
+      const dadosExistentes=docExistente.data();
+      usuario={
+        nome:dadosExistentes.nome,
+        cpf:dadosExistentes.cpf,
+        codigoConsultor:dadosExistentes.codigoConsultor,
+        nomeConsultor:dadosExistentes.nomeConsultor,
+        tipo:dadosExistentes.tipo,
+        modelo:dadosExistentes.modelo,
+        placa:dadosExistentes.placa,
+        bairro:dadosExistentes.bairro,
+        tel:dadosExistentes.tel,
+        venc:dadosExistentes.venc
+      };
+      showToast('✅ Bem-vindo de volta, '+usuario.nome.split(' ')[0]+'!');
+    } else {
+      // novo associado — criar no Firebase
+      ref=await addDoc(collection(db,'associados'),{
+        nome,cpf,codigoConsultor:codigo,nomeConsultor:cons.nome,
+        tipo,modelo,placa,bairro,tel,venc,
+        indicadoPor:indicador||'',
+        indConfirmadas:0,indTotal:0,cashback:0,
+        criado:new Date().toISOString()
+      });
+      docIdLocal=ref.id;
+      if(indicador){
+        await addDoc(collection(db,'indicacoes'),{
+          indicadorId:indicador,
+          indicadoNome:nome,
+          indicadoId:docIdLocal,
+          codigoConsultor:codigo,
+          status:'pendente',
+          criado:new Date().toISOString()
+        });
+      }
+      usuario={nome,cpf,codigoConsultor:codigo,nomeConsultor:cons.nome,tipo,modelo,placa,bairro,tel,venc};
+      showToast('✅ Bem-vindo à AR4, '+nome.split(' ')[0]+'!');
+    }
+
+    localStorage.setItem('ar4assoc',JSON.stringify(usuario));
+    localStorage.setItem('ar4docid',docIdLocal);
+    docId=docIdLocal;
+    iniciarApp();
+  } catch(e){showToast('Erro ao conectar.');console.error(e);}
+}
+
+function iniciarApp(){
+  document.getElementById('tela-login').style.display='none';
+  document.getElementById('tela-app').style.display='block';
+  document.getElementById('dot').classList.add('on');
+  if(!window.navigator.standalone) document.getElementById('install-tip').style.display='block';
+  if(notifAtiva) marcarNotifAtiva();
+  document.getElementById('sos-fab').classList.add('show');
+  atualizarUI();
+  carregarAlertas();
+  escutarAlertas();
+  carregarIndicacoes();
+  carregarDadosAssociado();
+}
+
+function atualizarUI(){
+  const nivel=getNivel(indConfirmadas);
+  // cartão principal
+  document.getElementById('c-nome').textContent=usuario.nome.toUpperCase();
+  document.getElementById('c-veiculo').textContent=usuario.tipo+' · '+usuario.modelo;
+  document.getElementById('c-consultor').textContent='CONSULTOR: '+(usuario.nomeConsultor||usuario.codigoConsultor);
+  document.getElementById('cartao-faixa').style.background=nivel.cor;
+  document.getElementById('cartao-nivel-badge').textContent=nivel.nome;
+  document.getElementById('cartao-nivel-badge').className='cartao-nivel txt-'+nivel.cls;
+  // cartão indicação
+  document.getElementById('ind-nome-cartao').textContent=usuario.nome.toUpperCase();
+  document.getElementById('ind-nivel-cartao').textContent='Nível '+nivel.nome+' · AR4 Proteção Veicular';
+  document.getElementById('cartao-ind-faixa').style.background=nivel.cor;
+  // score
+  atualizarScore();
+  // perfil
+  document.getElementById('perfil-info').innerHTML=`
+    <div class="row"><span class="row-label">Nome</span><span class="row-val">${usuario.nome}</span></div>
+    <div class="row"><span class="row-label">Veículo</span><span class="row-val">${usuario.tipo} · ${usuario.modelo}</span></div>
+    ${usuario.bairro?`<div class="row"><span class="row-label">Bairro</span><span class="row-val">${usuario.bairro}</span></div>`:''}
+    ${usuario.tel?`<div class="row"><span class="row-label">WhatsApp</span><span class="row-val">${usuario.tel}</span></div>`:''}
+    ${usuario.venc?`<div class="row"><span class="row-label">Boleto</span><span class="row-val">${usuario.venc}</span></div>`:''}
+    <div class="row"><span class="row-label">Consultor</span><span class="row-val">${usuario.nomeConsultor||usuario.codigoConsultor}</span></div>
+  `;
+}
+
+function atualizarScore(){
+  const nivel=getNivel(indConfirmadas);
+  const proxIdx=NIVEIS.indexOf(nivel)+1;
+  const prox=NIVEIS[proxIdx];
+  document.getElementById('score-nivel-nome').textContent=nivel.nome;
+  document.getElementById('score-nivel-nome').style.color=nivel.cor;
+  document.getElementById('score-badge').textContent=nivel.nome;
+  document.getElementById('score-badge').className='score-badge txt-'+nivel.cls;
+  // barra
+  let pct=0;
+  if(prox){ pct=Math.round(((indConfirmadas-nivel.min)/(prox.min-nivel.min))*100); }
+  else { pct=100; }
+  document.getElementById('score-bar').style.width=Math.min(pct,100)+'%';
+  document.getElementById('score-bar').style.background=nivel.cor;
+  document.getElementById('score-atual-txt').textContent=indConfirmadas+' indicações confirmadas';
+  document.getElementById('score-prox-txt').textContent=prox?'Próximo: '+prox.nome+' ('+prox.min+')':'Nível máximo! 🏆';
+  document.getElementById('sc-total').textContent=indTotal;
+  document.getElementById('sc-conf').textContent=indConfirmadas;
+  document.getElementById('cashback-meses').textContent=indConfirmadas;
+  // benefícios
+  document.getElementById('lista-beneficios').innerHTML=nivel.beneficios.map(b=>`
+    <div class="beneficio">
+      <div class="beneficio-ico" style="background:rgba(255,214,0,.1);">✅</div>
+      <div><div class="beneficio-txt">${b}</div></div>
+    </div>`).join('');
+  // notificação de progresso
+  if(prox && (prox.min-indConfirmadas)===1){
+    showToast('⭐ Você está a 1 indicação de virar '+prox.nome+'!');
+  }
+}
+
+async function carregarDadosAssociado(){
+  if(!docId) return;
+  try {
+    const snap=await getDocs(query(collection(db,'associados'),where('__name__','==',docId)));
+    if(!snap.empty){
+      const d=snap.docs[0].data();
+      indConfirmadas=d.indConfirmadas||0;
+      indTotal=d.indTotal||0;
+      atualizarUI();
+    }
+  }catch(e){}
+}
+
+async function carregarIndicacoes(){
+  if(!docId) return;
+  const el=document.getElementById('lista-indicacoes');
+  try {
+    const q=query(collection(db,'indicacoes'),where('indicadorId','==',docId));
+    const snap=await getDocs(q);
+    indTotal=snap.size;
+    if(!snap.size){el.innerHTML='<div class="empty"><p>Nenhuma indicação ainda.<br>Compartilhe seu cartão!</p></div>';return;}
+    el.innerHTML=snap.docs.map(d=>{
+      const i=d.data();
+      const conf=i.status==='confirmado';
+      return `<div class="ind-item">
+        <div class="ind-av">${i.indicadoNome.charAt(0).toUpperCase()}</div>
+        <div style="flex:1;">
+          <div class="ind-nome">${i.indicadoNome}</div>
+          <div class="ind-info">${new Date(i.criado).toLocaleDateString('pt-BR')}</div>
+        </div>
+        <span class="ind-badge ${conf?'ind-confirmado':'ind-pendente'}">${conf?'✓ CONFIRMADO':'PENDENTE'}</span>
+      </div>`;
+    }).join('');
+    document.getElementById('sc-total').textContent=indTotal;
+  }catch(e){}
+}
+
+window.compartilharCartao=()=>{
+  const link=`${window.location.origin}${window.location.pathname}?ind=${docId}`;
+  const nivel=getNivel(indConfirmadas);
+  const msg=`🛡️ *AR4 Proteção Veicular*\n\nOlá! Sou ${usuario.nome}, associado nível *${nivel.nome}* da AR4.\n\nVocê já protegeu seu veículo? A AR4 oferece proteção completa com assistência 24h e rastreamento!\n\n👉 Se associe pelo meu link e eu ganho desconto na mensalidade:\n${link}\n\n_Proteção real para seu veículo em Recife!_`;
+  if(navigator.share){
+    navigator.share({title:'AR4 Proteção Veicular',text:msg});
+  } else {
+    navigator.clipboard.writeText(msg).then(()=>showToast('✓ Mensagem copiada!'));
+  }
+}
+
+window.ativarNotif=async()=>{
+  try {
+    OneSignalDeferred.push(async function(OneSignal){
+      await OneSignal.Notifications.requestPermission();
+      const id=await OneSignal.User.PushSubscription.id;
+      if(id){
+        await OneSignal.User.addTag('consultor',usuario.codigoConsultor);
+        localStorage.setItem('ar4notif','true');
+        notifAtiva=true;
+        marcarNotifAtiva();
+        showToast('✅ Notificações ativadas!');
+      }
+    });
+  }catch(e){
+    if('Notification' in window){
+      const p=await Notification.requestPermission();
+      if(p==='granted'){localStorage.setItem('ar4notif','true');notifAtiva=true;marcarNotifAtiva();showToast('✅ Ativadas!');}
+    }
+  }
+}
+
+function marcarNotifAtiva(){
+  const btn=document.getElementById('btn-notif');
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> ✓ NOTIFICAÇÕES ATIVAS';
+  btn.onclick=null;btn.style.cursor='default';
+  btn.style.opacity='.7';
+}
+
+async function carregarAlertas(){
+  const el=document.getElementById('lista-alertas');
+  el.innerHTML='<div class="empty"><p>Carregando...</p></div>';
+  try {
+    const q=query(collection(db,'alertas'),where('codigoConsultor','==',usuario.codigoConsultor),orderBy('timestamp','desc'));
+    const snap=await getDocs(q);
+    renderAlertas(snap.docs.map(d=>({id:d.id,...d.data()})));
+  }catch(e){ el.innerHTML='<div class="empty"><p>Conecte à internet para ver os alertas.</p></div>'; }
+}
+
+function escutarAlertas(){
+  try {
+    const q=query(collection(db,'alertas'),where('codigoConsultor','==',usuario.codigoConsultor),orderBy('timestamp','desc'));
+    onSnapshot(q,snap=>{
+      const lista=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderAlertas(lista);
+      if(lista.length&&lista[0].id!==ultimoId){
+        if(ultimoId){ const a=lista[0]; showToast('🚨 AR4 Recuperou! '+(a.modelo||a.tipo)+(a.bairro?' em '+a.bairro:'')); }
+        ultimoId=lista[0].id;
+        localStorage.setItem('ar4ultimo',ultimoId);
+      }
+    });
+  }catch(e){}
+}
+
+function renderAlertas(lista){
+  const el=document.getElementById('lista-alertas');
+  if(!lista.length){ el.innerHTML='<div class="empty"><p>Nenhum alerta ainda.<br>Quando a AR4 recuperar um veículo<br>você será notificado aqui.</p></div>'; return; }
+  el.innerHTML=lista.map((a,i)=>{
+    const novo=i===0&&a.id===ultimoId;
+    const dt=new Date(a.criado);
+    const hora=dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const data=dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    const icon=a.tipo==='Moto'?'🏍️':'🚗';
+    return `<div class="alerta-card ${novo?'alerta-novo':''}">
+      <div class="alerta-top"><span class="${novo?'badge-novo':'badge-visto'}">${novo?'⚡ NOVO':'RECUPERADO'}</span><span class="alerta-data">${data} · ${hora}</span></div>
+      <div class="alerta-tit">${icon} VEÍCULO RECUPERADO</div>
+      <div class="row"><span class="row-label">Tipo</span><span class="row-val">${a.tipo}</span></div>
+      ${a.modelo?`<div class="row"><span class="row-label">Veículo</span><span class="row-val">${a.modelo}</span></div>`:''}
+      ${a.bairro?`<div class="row"><span class="row-label">Local</span><span class="row-val">${a.bairro}</span></div>`:''}
+      <div class="row"><span class="row-label">Horário</span><span class="row-val">${hora} · ${data}</span></div>
+      <div class="row"><span class="row-label">Consultor</span><span class="row-val">${a.nomeConsultor||a.codigoConsultor}</span></div>
+      ${a.extra?`<div class="row"><span class="row-label">Obs</span><span class="row-val" style="font-style:italic;color:#ccc;">"${a.extra}"</span></div>`:''}
+      <div class="alerta-footer">✅ Seu veículo está protegido pela AR4.<br>Fique tranquilo — estamos sempre de olho!</div>
+    </div>`;
+  }).join('');
+}
+
+window.goTab=(t)=>{
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+t).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+}
+
+// ---- SOS ----
+// ---- SOS ----
+window.abrirSOS=()=>{
+  if(usuario){
+    document.getElementById('sos-veiculo-nome').textContent=usuario.tipo+' · '+usuario.modelo+(usuario.placa?' · '+usuario.placa:'');
+    document.getElementById('sos-veiculo-info').textContent=(usuario.bairro||'Informe sua localização atual à central e à polícia');
+    document.getElementById('sos-consultor-nome').textContent=usuario.nomeConsultor||usuario.codigoConsultor;
+    document.getElementById('sos-consultor-info').textContent='Consultor: '+(usuario.nomeConsultor||usuario.codigoConsultor);
+  }
+  document.getElementById('sos-overlay').classList.add('active');
+  document.getElementById('sos-descricao').value='';
+}
+
+window.fecharSOS=()=>{
+  document.getElementById('sos-overlay').classList.remove('active');
+}
+
+window.ligarCentral=()=>{ window.location.href='tel:08009401880'; }
+
+window.whatsEmergencia=()=>{
+  const msg=usuario
+    ? `🚨 *EMERGÊNCIA AR4*\n\nAssociado: *${usuario.nome}*\nVeículo: *${usuario.tipo} ${usuario.modelo}*${usuario.bairro?'\nBairro: '+usuario.bairro:''}\n\nPreciso de assistência urgente!`
+    : '🚨 Preciso de assistência urgente AR4!';
+  window.open(`https://wa.me/558541411120?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+window.ligarConsultor=()=>{
+  if(usuario&&usuario.tel){ window.location.href='tel:'+usuario.tel.replace(/\D/g,''); }
+  else { showToast('Telefone do consultor não cadastrado.'); }
+}
+
+window.enviarOcorrido=async()=>{
+  if(!usuario){ showToast('Faça login primeiro.'); return; }
+  const descricao=document.getElementById('sos-descricao').value.trim();
+  if(!descricao){ showToast('Descreva o que aconteceu.'); return; }
+  const btn=document.querySelector('.sos-enviar');
+  btn.textContent='Enviando...';btn.disabled=true;
+  try {
+    await addDoc(collection(db,'ocorridos'),{
+      associadoNome:usuario.nome,
+      associadoTel:usuario.tel||'',
+      associadoCPF:usuario.cpf||'',
+      associadoPlaca:usuario.placa||'',
+      codigoConsultor:usuario.codigoConsultor,
+      nomeConsultor:usuario.nomeConsultor||'',
+      veiculo:usuario.tipo+' '+usuario.modelo+(usuario.placa?' — Placa: '+usuario.placa:''),
+      bairro:usuario.bairro||'',
+      descricao,
+      status:'aberto',
+      timestamp:Date.now(),
+      criado:new Date().toISOString()
+    });
+
+    // buscar subscription IDs do consultor no Firebase
+    const qNotif=query(collection(db,'consultores_notif'),where('codigo','==',usuario.codigoConsultor));
+    const snapNotif=await getDocs(qNotif);
+    const subIds=snapNotif.docs.map(d=>d.data().subscriptionId).filter(Boolean);
+
+    const titulo='🚨 Ocorrido registrado!';
+    const corpo=`${usuario.nome} (${usuario.placa||'sem placa'}): "${descricao.substring(0,80)}"`;
+
+    if(subIds.length>0){
+      // enviar para subscription IDs específicos
+      await fetch('https://onesignal.com/api/v1/notifications',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'os_v2_app_sfjdqbfpcngwlitmi3ztnkfs4g4srttsaxnuoy4oatsdcq2u6i7sgimjreyul4iv44ajhqjpryqmsibyl5fwfscnsmjz54k2g3boy6i'},
+        body:JSON.stringify({
+          app_id:'91523804-af13-4d65-a26c-46f336a8b2e1',
+          include_subscription_ids: subIds,
+          headings:{pt:titulo,en:titulo},
+          contents:{pt:corpo,en:corpo},
+          url:'https://effortless-torte-99f756.netlify.app/ar4_painel.html'
+        })
+      });
+    } else {
+      // fallback: enviar por tag
+      await fetch('https://onesignal.com/api/v1/notifications',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'os_v2_app_sfjdqbfpcngwlitmi3ztnkfs4g4srttsaxnuoy4oatsdcq2u6i7sgimjreyul4iv44ajhqjpryqmsibyl5fwfscnsmjz54k2g3boy6i'},
+        body:JSON.stringify({
+          app_id:'91523804-af13-4d65-a26c-46f336a8b2e1',
+          filters:[{field:'tag',key:'consultor',relation:'=',value:usuario.codigoConsultor}],
+          headings:{pt:titulo,en:titulo},
+          contents:{pt:corpo,en:corpo},
+          url:'https://effortless-torte-99f756.netlify.app/ar4_painel.html'
+        })
+      });
+    }
+
+    showToast('✅ Consultor notificado!');
+    document.getElementById('sos-descricao').value='';
+    fecharSOS();
+  } catch(e){ showToast('Erro ao enviar. Ligue direto para a central.'); console.error(e); }
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> ALERTAR MEU CONSULTOR AGORA';
+  btn.disabled=false;
+}
+
+window.compartilharCartao=()=>{
+  const link=`${window.location.origin}${window.location.pathname}?ind=${docId}`;
+  const nivel=getNivel(indConfirmadas);
+  const msg=`🛡️ *AR4 Proteção Veicular*\n\nOlá! Sou *${usuario.nome}*, associado nível *${nivel.nome}* da AR4 Proteção Veicular.\n\nVocê já protegeu seu veículo? A AR4 oferece:\n✅ Proteção contra roubo e furto\n✅ Assistência 24h\n✅ Rastreamento em tempo real\n✅ Suporte emergência\n\n👉 Clique no link abaixo e se associe:\n${link}\n\n_(Use meu link e me ajude a ganhar um mês grátis! 😊)_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+window.sair=()=>{
+  if(!confirm('Sair? Seus dados serão removidos deste dispositivo.'))return;
+  ['ar4assoc','ar4notif','ar4ultimo','ar4docid'].forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Registrar SW
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(()=>{});
+}
+
+init();
+</script>
+</body>
+</html>

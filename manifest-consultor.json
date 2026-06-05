@@ -1,0 +1,16 @@
+{
+  "name": "AR4 Consultor",
+  "short_name": "AR4 Consultor",
+  "description": "Painel do consultor AR4 Proteção Veicular",
+  "start_url": "/ar4_painel.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
