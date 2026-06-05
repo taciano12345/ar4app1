@@ -1,8 +1,9 @@
 {
   "name": "AR4 Proteção Veicular",
   "short_name": "AR4",
-  "description": "App do associado AR4",
-  "start_url": "/ar4_app_associado.html",
+  "description": "App do associado AR4 Proteção Veicular",
+  "start_url": "/ar4app1/ar4_app_associado.html",
+  "scope": "/ar4app1/",
   "display": "standalone",
   "background_color": "#0A0A0A",
   "theme_color": "#0A0A0A",
